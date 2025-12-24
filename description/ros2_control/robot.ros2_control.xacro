@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="robot_ros2_control">
+
+    <ros2_control name="robot_ros2_control" type="system">
+      <hardware>
+        <plugin>odrive_ros2_control_example/RobotHardwareInterface</plugin>
+        <param name="debug">true</param>
+      </hardware>
+
+      <joint name="arm">
+        <!-- Command Interfaces (Input) -->
+        <command_interface name="position" data_type="double"/>
+        <command_interface name="velocity" data_type="double"/>
+        <command_interface name="torque" data_type="double"/>
+        <command_interface name="position_lower_limit" data_type="double"/>
+        <command_interface name="position_upper_limit" data_type="double"/>
+        <command_interface name="velocity_limit" data_type="double"/>
+        <command_interface name="torque_limit" data_type="double"/>
+        <!-- State Interfaces (Output) -->
+        <state_interface name="position" data_type="double">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity" data_type="double">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="torque" data_type="double">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="ready" data_type="bool">
+          <param name="initial_value">false</param>
+        </state_interface>
+        <state_interface name="error" data_type="bool">
+          <param name="initial_value">false</param>
+        </state_interface>
+      </joint>
+
+    </ros2_control>
+
+  </xacro:macro>
+
+</robot>

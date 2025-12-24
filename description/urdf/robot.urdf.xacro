@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+  <link name="world"/>
+  <link name="body">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.1 0.4"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.1 0.4"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="arm">
+    <visual>
+      <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 1.0"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 1.0"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_body" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 1"/>
+    <parent link="world"/>
+    <child link="body"/>
+  </joint>
+  <joint name="body_to_arm" type="continuous">
+    <origin rpy="0 0 0" xyz="0 -0.075 0"/>
+    <parent link="body"/>
+    <child link="arm"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- Import robot ros2_control description -->
+  <xacro:include filename="$(find odrive_ros2_control_example)/ros2_control/robot.ros2_control.xacro" />
+  <xacro:robot_ros2_control/>
+
+</robot>

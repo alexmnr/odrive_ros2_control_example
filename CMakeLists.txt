@@ -8,4 +8,10 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 
+# Add launch files
+install(
+  DIRECTORY description/launch description/urdf description/ros2_control
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 ament_package()
