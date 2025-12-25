@@ -3,20 +3,22 @@
   <xacro:macro name="robot_ros2_control">
 
     <ros2_control name="robot_ros2_control" type="system">
+
       <hardware>
         <plugin>odrive_ros2_control_example/RobotHardwareInterface</plugin>
-        <param name="debug">true</param>
+        <param name="debug">1</param>
       </hardware>
 
       <joint name="arm">
+        <!-- Parameters -->
+        <param name="node_id">0</param>
+        <param name="reduction_ratio">1</param>
+        <param name="velocity_limit">10</param>
+        <param name="effort_limit">5</param>
         <!-- Command Interfaces (Input) -->
         <command_interface name="position" data_type="double"/>
         <command_interface name="velocity" data_type="double"/>
-        <command_interface name="torque" data_type="double"/>
-        <command_interface name="position_lower_limit" data_type="double"/>
-        <command_interface name="position_upper_limit" data_type="double"/>
-        <command_interface name="velocity_limit" data_type="double"/>
-        <command_interface name="torque_limit" data_type="double"/>
+        <command_interface name="effort" data_type="double"/>
         <!-- State Interfaces (Output) -->
         <state_interface name="position" data_type="double">
           <param name="initial_value">0.0</param>
@@ -24,7 +26,7 @@
         <state_interface name="velocity" data_type="double">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <state_interface name="torque" data_type="double">
+        <state_interface name="effort" data_type="double">
           <param name="initial_value">0.0</param>
         </state_interface>
         <state_interface name="ready" data_type="bool">

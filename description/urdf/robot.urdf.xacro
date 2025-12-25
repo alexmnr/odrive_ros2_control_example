@@ -35,7 +35,7 @@
     <parent link="world"/>
     <child link="body"/>
   </joint>
-  <joint name="body_to_arm" type="continuous">
+  <joint name="arm" type="continuous">
     <origin rpy="0 0 0" xyz="0 -0.075 0"/>
     <parent link="body"/>
     <child link="arm"/>

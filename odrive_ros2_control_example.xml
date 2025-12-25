@@ -1,0 +1,9 @@
+<library path="odrive_ros2_control_example">
+  <class name="odrive_ros2_control_example/RobotHardwareInterface"
+         type="odrive_ros2_control_example::RobotHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The ros2_control example for odrive s1.
+    </description>
+  </class>
+</library>

@@ -1,0 +1,18 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 10  # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    odrive_forward_controller:
+      type: forward_command_controller/MultiInterfaceForwardCommandController
+
+odrive_forward_controller:
+  ros__parameters:
+    joints:
+      - arm
+    interface_names: 
+      - position
+      - velocity
+      - effort
