@@ -11,7 +11,7 @@
 
       <joint name="arm">
         <!-- Parameters -->
-        <param name="node_id">0</param>
+        <param name="can_id">3</param>
         <param name="reduction_ratio">1</param>
         <param name="velocity_limit">10</param>
         <param name="effort_limit">5</param>
@@ -29,12 +29,12 @@
         <state_interface name="effort" data_type="double">
           <param name="initial_value">0.0</param>
         </state_interface>
-        <state_interface name="ready" data_type="bool">
-          <param name="initial_value">false</param>
-        </state_interface>
-        <state_interface name="error" data_type="bool">
-          <param name="initial_value">false</param>
-        </state_interface>
+        <!-- <state_interface name="ready" data_type="bool"> -->
+        <!--   <param name="initial_value">false</param> -->
+        <!-- </state_interface> -->
+        <!-- <state_interface name="error" data_type="bool"> -->
+        <!--   <param name="initial_value">false</param> -->
+        <!-- </state_interface> -->
       </joint>
 
     </ros2_control>
