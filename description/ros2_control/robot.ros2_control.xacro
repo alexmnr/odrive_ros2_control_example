@@ -6,12 +6,12 @@
 
       <hardware>
         <plugin>odrive_ros2_control_example/RobotHardwareInterface</plugin>
-        <param name="debug">1</param>
+        <param name="can_interface_name">can0</param>
       </hardware>
 
       <joint name="arm">
         <!-- Parameters -->
-        <param name="can_id">3</param>
+        <param name="can_id">0</param>
         <param name="reduction_ratio">1</param>
         <param name="velocity_limit">10</param>
         <param name="effort_limit">5</param>
