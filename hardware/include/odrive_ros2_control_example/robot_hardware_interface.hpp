@@ -53,6 +53,7 @@ class RobotHardwareInterface : public hardware_interface::SystemInterface
     void on_heartbeat(const can_frame& frame);
     void on_encoder_feedback(const can_frame& frame);
     void on_torque_feedback(const can_frame& frame);
+    void clear_error();
     template <typename T>
     void send(const T& msg, bool rtr = false) const {
         struct can_frame frame;
@@ -88,7 +89,11 @@ private:
 
   std::vector<Joint> joints;
 
+  // on can msg
   void on_can_msg(const can_frame& frame);
+
+  // helper functions
+  void clear_all_errors();
 };
 
 }  // namespace odrive_ros2_control_example
