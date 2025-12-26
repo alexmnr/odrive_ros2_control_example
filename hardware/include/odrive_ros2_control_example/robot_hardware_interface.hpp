@@ -37,6 +37,12 @@ class RobotHardwareInterface : public hardware_interface::SystemInterface
     double velocity_state = 0.0;
     double effort_state = 0.0;
     double effort_target = 0.0;
+    // other variables
+    uint32_t odrive_error = 1;
+    uint8_t odrive_state = 0;
+    uint8_t odrive_procedure_result = 0;
+    uint8_t odrive_trajectory_done = 0;
+    bool ready = false;
     // Constructor Function
     Joint(std::string name_, uint8_t can_id_, double reduction_ratio_, double velocity_limit_, double effort_limit_) 
       : name(name_), can_id(can_id_), reduction_ratio(reduction_ratio_), velocity_limit(velocity_limit_), effort_limit(effort_limit_) {}
@@ -44,6 +50,9 @@ class RobotHardwareInterface : public hardware_interface::SystemInterface
     SocketCanIntf* can_intf;
     // functions
     void on_can_msg(const can_frame& frame);
+    void on_heartbeat(const can_frame& frame);
+    void on_encoder_feedback(const can_frame& frame);
+    void on_torque_feedback(const can_frame& frame);
     template <typename T>
     void send(const T& msg, bool rtr = false) const {
         struct can_frame frame;
@@ -55,7 +64,6 @@ class RobotHardwareInterface : public hardware_interface::SystemInterface
           frame.can_dlc = msg.msg_length;
           msg.encode_buf(frame.data);
         }
-
         can_intf->send_can_frame(frame);
     }
   };

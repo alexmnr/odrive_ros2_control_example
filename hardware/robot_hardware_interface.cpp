@@ -51,11 +51,8 @@ namespace odrive_ros2_control_example
   ////////////////////// on_configure /////////////////////////
   hardware_interface::CallbackReturn RobotHardwareInterface::on_configure(const rclcpp_lifecycle::State &) {
     if (!can_intf_.init(can_interface_name_, &event_loop_, std::bind(&RobotHardwareInterface::on_can_msg, this, _1))) {
-      RCLCPP_ERROR(
-          rclcpp::get_logger("ODriveHardwareInterface"),
-          "Failed to initialize SocketCAN on %s",
-          can_interface_name_.c_str()
-          );
+      RCLCPP_ERROR(rclcpp::get_logger("RobotHardwareInterface"), "Failed to initialize SocketCAN on %s", can_interface_name_.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("RobotHardwareInterface"), "Have you run 'sudo ip link set up can0 type can bitrate 1000000'?");
       return CallbackReturn::ERROR;
     }
     RCLCPP_INFO(rclcpp::get_logger("RobotHardwareInterface"), "Initialized SocketCAN on %s", can_interface_name_.c_str());
@@ -68,6 +65,26 @@ namespace odrive_ros2_control_example
 
   ////////////////////// on_activate /////////////////////////
   hardware_interface::CallbackReturn RobotHardwareInterface::on_activate(const rclcpp_lifecycle::State &) {
+    // Check if all joints are ready
+    while (1) {
+      while (can_intf_.read_nonblocking()) {
+        // repeat until CAN interface has no more messages
+      }
+      bool finish = true;
+      for (auto &joint : joints) {
+        if (joint.odrive_error == 0 && joint.odrive_state == 1) {
+          joint.ready = true;
+          RCLCPP_INFO(rclcpp::get_logger("RobotHardwareInterface"), "Motor with can_id %d for joint '%s' is ready!", joint.can_id, joint.name.c_str());
+        } else {
+          finish = false;
+        }
+      }
+      if (finish) {
+        return hardware_interface::CallbackReturn::SUCCESS;
+      }
+      rclcpp::sleep_for(std::chrono::milliseconds(500));
+      RCLCPP_INFO(rclcpp::get_logger("RobotHardwareInterface"), "Hardware not ready yet...");
+    }
     return hardware_interface::CallbackReturn::SUCCESS;
   }
 
@@ -77,6 +94,14 @@ namespace odrive_ros2_control_example
     while (can_intf_.read_nonblocking()) {
       // repeat until CAN interface has no more messages
     }
+
+    ////// CONTINUE ONLY IF READY
+    for (auto &joint : joints) {
+      if (!joint.ready) {
+        return hardware_interface::return_type::OK;
+      }
+    }
+    
     // Request Torques and Encoder Estimates
     for (auto &joint : joints) {
       Get_Torques_msg_t get_torques_msg;
@@ -144,31 +169,54 @@ namespace odrive_ros2_control_example
   void RobotHardwareInterface::Joint::on_can_msg(const can_frame& frame) {
     uint8_t cmd = frame.can_id & 0x1f;
 
-    auto try_decode = [&]<typename TMsg>(TMsg& msg) {
-      if (frame.can_dlc < Get_Encoder_Estimates_msg_t::msg_length) {
-        RCLCPP_WARN(rclcpp::get_logger("RobotHardwareInterface"), "message %d too short", cmd);
-        return false;
-      }
-      msg.decode_buf(frame.data);
-      return true;
-    };
-
     switch (cmd) {
       case Get_Encoder_Estimates_msg_t::cmd_id: {
-        if (Get_Encoder_Estimates_msg_t msg; try_decode(msg)) {
-          position_state = msg.Pos_Estimate * (2 * M_PI);
-          velocity_state = msg.Vel_Estimate * (2 * M_PI);
-        }
+        on_encoder_feedback(frame);
       } break;
       case Get_Torques_msg_t::cmd_id: {
-        if (Get_Torques_msg_t msg; try_decode(msg)) {
-          effort_target = msg.Torque_Target;
-          effort_state = msg.Torque_Estimate;
-        }
+        on_torque_feedback(frame);
+      } break;
+      case Heartbeat_msg_t::cmd_id: {
+        on_heartbeat(frame);
       } break;
     }
   }
-
+  void RobotHardwareInterface::Joint::on_encoder_feedback(const can_frame& frame) {
+    if (frame.can_dlc < Get_Encoder_Estimates_msg_t::msg_length) {
+      RCLCPP_WARN(rclcpp::get_logger("RobotHardwareInterface"), "message %d too short", Get_Encoder_Estimates_msg_t::cmd_id);
+      return;
+    }
+    Get_Encoder_Estimates_msg_t msg;
+    msg.decode_buf(frame.data);
+    position_state = msg.Pos_Estimate * (2 * M_PI) / reduction_ratio;
+    velocity_state = msg.Vel_Estimate * (2 * M_PI) / reduction_ratio;
+  }
+  void RobotHardwareInterface::Joint::on_torque_feedback(const can_frame& frame) {
+    if (frame.can_dlc < Get_Torques_msg_t::msg_length) {
+      RCLCPP_WARN(rclcpp::get_logger("RobotHardwareInterface"), "message %d too short", Get_Torques_msg_t::cmd_id);
+      return;
+    }
+    Get_Torques_msg_t msg;
+    msg.decode_buf(frame.data);
+    effort_target = msg.Torque_Target * reduction_ratio;
+    effort_state = msg.Torque_Estimate * reduction_ratio;
+  }
+  void RobotHardwareInterface::Joint::on_heartbeat(const can_frame& frame) {
+    if (frame.can_dlc < Heartbeat_msg_t::msg_length) {
+      RCLCPP_WARN(rclcpp::get_logger("RobotHardwareInterface"), "message %d too short", Heartbeat_msg_t::cmd_id);
+      return;
+    }
+    Heartbeat_msg_t msg;
+    msg.decode_buf(frame.data);
+    odrive_error = msg.Axis_Error;
+    odrive_state = msg.Axis_State;
+    odrive_procedure_result = msg.Procedure_Result;
+    odrive_trajectory_done = msg.Trajectory_Done_Flag;
+    if (odrive_error != 0) {
+      ready = false;
+      RCLCPP_INFO(rclcpp::get_logger("RobotHardwareInterface"), "Joint '%s' with can-id '%d' has error '%d' and state '%d'", name.c_str(), can_id, odrive_error, odrive_state);
+    }
+  }
 
 }  // namespace odrive_ros2_control_example
 

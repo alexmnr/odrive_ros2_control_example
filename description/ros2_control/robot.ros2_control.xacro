@@ -12,7 +12,7 @@
       <joint name="arm">
         <!-- Parameters -->
         <param name="can_id">0</param>
-        <param name="reduction_ratio">1</param>
+        <param name="reduction_ratio">2</param>
         <param name="velocity_limit">10</param>
         <param name="effort_limit">5</param>
         <!-- Command Interfaces (Input) -->
