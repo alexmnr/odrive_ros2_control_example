@@ -6,35 +6,45 @@
 
       <hardware>
         <plugin>odrive_ros2_control_example/RobotHardwareInterface</plugin>
+        <!-- Hardware Parameters -->
+        <!-- Name of can interface to use -->
         <param name="can_interface_name">can0</param>
+        <!-- 
+          Control Mode
+            - position_filtered
+            - position_trajectory
+            - torque
+        -->
+        <param name="control_mode">position_filtered</param>
       </hardware>
 
       <joint name="arm">
-        <!-- Parameters -->
+        <!-- Joint Parameters -->
+        <param name="joint_reduction_ratio">4</param>
+        <!-- Motor Parameters -->
         <param name="can_id">0</param>
-        <param name="reduction_ratio">2</param>
-        <param name="velocity_limit">10</param>
-        <param name="effort_limit">5</param>
-        <!-- Command Interfaces (Input) -->
+        <param name="motor_velocity_limit">10</param>
+        <param name="motor_current_limit">15</param>
+        <!-- PID Gains -->
+        <param name="position_p_gain">20</param>
+        <param name="velocity_p_gain">0.167</param>
+        <param name="velocity_i_gain">0.333</param>
+        <!-- position_fitered control_mode parameters -->
+        <param name="input_filter_bandwith">1000</param>
+        <!-- position_trajectory control_mode parameters -->
+        <param name="trajectory_vel_limit">10</param>
+        <param name="trajectory_accel_limit">8</param>
+        <param name="trajectory_descel_limit">8</param>
+        <param name="trajectory_inertia">0</param>
+
+        <!-- Command Interfaces -->
         <command_interface name="position" data_type="double"/>
         <command_interface name="velocity" data_type="double"/>
         <command_interface name="effort" data_type="double"/>
-        <!-- State Interfaces (Output) -->
-        <state_interface name="position" data_type="double">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity" data_type="double">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="effort" data_type="double">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <!-- <state_interface name="ready" data_type="bool"> -->
-        <!--   <param name="initial_value">false</param> -->
-        <!-- </state_interface> -->
-        <!-- <state_interface name="error" data_type="bool"> -->
-        <!--   <param name="initial_value">false</param> -->
-        <!-- </state_interface> -->
+        <!-- State Interfaces -->
+        <state_interface name="position" data_type="double"/>
+        <state_interface name="velocity" data_type="double"/>
+        <state_interface name="effort" data_type="double"/>
       </joint>
 
     </ros2_control>

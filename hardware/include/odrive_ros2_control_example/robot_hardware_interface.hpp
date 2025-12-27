@@ -23,11 +23,19 @@ class RobotHardwareInterface : public hardware_interface::SystemInterface
 {
   struct Joint {
     // parameters
-    const std::string name;
-    const uint8_t can_id;
-    const double reduction_ratio;
-    const double velocity_limit;
-    const double effort_limit;
+    std::string name;
+    uint8_t can_id;
+    double joint_reduction_ratio;
+    double motor_velocity_limit;
+    double motor_current_limit;
+    double position_p_gain;
+    double velocity_p_gain;
+    double velocity_i_gain;
+    double input_filter_bandwith;
+    double trajectory_vel_limit;
+    double trajectory_accel_limit;
+    double trajectory_descel_limit;
+    double trajectory_inertia;
     // command variables
     double position_command = 0.0;
     double velocity_command = 0.0;
@@ -42,18 +50,30 @@ class RobotHardwareInterface : public hardware_interface::SystemInterface
     uint8_t odrive_state = 0;
     uint8_t odrive_procedure_result = 0;
     uint8_t odrive_trajectory_done = 0;
+    std::string fw_version = "";
+    std::string hw_version = "";
     bool ready = false;
     // Constructor Function
-    Joint(std::string name_, uint8_t can_id_, double reduction_ratio_, double velocity_limit_, double effort_limit_) 
-      : name(name_), can_id(can_id_), reduction_ratio(reduction_ratio_), velocity_limit(velocity_limit_), effort_limit(effort_limit_) {}
+    // Joint(std::string name_, uint8_t can_id_, double reduction_ratio_, double velocity_limit_, double current_limit_) 
+    //   : name(name_), can_id(can_id_), reduction_ratio(reduction_ratio_), velocity_limit(velocity_limit_), current_limit(current_limit_) {}
+    // Joint();
     // CAN variables
     SocketCanIntf* can_intf;
-    // functions
+    // response functions
     void on_can_msg(const can_frame& frame);
     void on_heartbeat(const can_frame& frame);
     void on_encoder_feedback(const can_frame& frame);
     void on_torque_feedback(const can_frame& frame);
+    void on_version_msg(const can_frame& frame);
+    // helper functions
     void clear_error();
+    void request_encoder_feedback();
+    void request_torques_feedback();
+    void set_motor_limits();
+    void set_trajectory_limits();
+    void set_gains();
+    template <typename V>
+    void write_parameter(uint16_t endpoint_id, V value);
     template <typename T>
     void send(const T& msg, bool rtr = false) const {
         struct can_frame frame;
@@ -83,10 +103,18 @@ public:
 
 
 private:
+  // parameters
   std::string can_interface_name_;
+  std::string control_mode_;
+  // control and input mode variables
+  uint32_t odrive_control_mode_;
+  uint32_t odrive_input_mode_;
+
+  // can variables
   SocketCanIntf can_intf_;
   EpollEventLoop event_loop_;
 
+  // joints
   std::vector<Joint> joints;
 
   // on can msg

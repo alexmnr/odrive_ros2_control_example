@@ -6,10 +6,12 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     odrive_forward_controller:
-      type: forward_command_controller/ForwardCommandController
+      type: forward_command_controller/MultiInterfaceForwardCommandController
 
 odrive_forward_controller:
   ros__parameters:
-    joints:
-      - arm
-    interface_name: position
+    joint: arm
+    interface_names:
+      - position
+      - velocity
+      - effort
