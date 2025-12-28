@@ -26,9 +26,9 @@
         <param name="motor_velocity_limit">10</param>
         <param name="motor_current_limit">15</param>
         <!-- PID Gains -->
-        <param name="position_p_gain">20</param>
-        <param name="velocity_p_gain">0.167</param>
-        <param name="velocity_i_gain">0.333</param>
+        <param name="position_p_gain">30</param>
+        <param name="velocity_p_gain">0.2</param>
+        <param name="velocity_i_gain">4.0</param>
         <!-- position_fitered control_mode parameters -->
         <param name="input_filter_bandwith">1000</param>
         <!-- position_trajectory control_mode parameters -->
