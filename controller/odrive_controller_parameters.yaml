@@ -1,0 +1,108 @@
+odrive_controller:
+  joints: {
+    type: string_array,
+    default_value: [],
+    description: "Specifies joints used by the controller",
+    read_only: true,
+    validation: {
+      unique<>: null,
+      not_empty<>: null,
+    }
+  }
+  command_interface: {
+    type: string,
+    default_value: "",
+    description: "Name of the interface used by the controller for writing commands to the hardware.",
+    read_only: true,
+    validation: {
+      not_empty<>: null,
+    }
+  }
+  state_interfaces: {
+    type: string_array,
+    default_value: [],
+    description: "Name of the interfaces used by the controller getting hardware states.",
+    read_only: true,
+    validation: {
+      not_empty<>: null,
+      size_gt<>: 0,
+      size_lt<>: 3,
+    }
+  }
+  gains:
+    __map_joints:
+      position_p: {
+        type: double,
+        default_value: 0.0,
+        description: "Position Proportional gain for PID"
+      }
+      position_i: {
+        type: double,
+        default_value: 0.0,
+        description: "Position Integral gain for PID"
+      }
+      position_d: {
+        type: double,
+        default_value: 0.0,
+        description: "Position Derivative gain for PID"
+      }
+      position_u_clamp_max: {
+        type: double,
+        default_value: .inf,
+        description: "Position Upper output clamp."
+      }
+      position_u_clamp_min: {
+        type: double,
+        default_value: -.inf,
+        description: "Position Lower output clamp."
+      }
+      position_i_clamp_max: {
+        type: double,
+        default_value: .inf,
+        description: "Position Upper integral clamp."
+      }
+      position_i_clamp_min: {
+        type: double,
+        default_value: -.inf,
+        description: "Position Lower integral clamp."
+      }
+      velocity_p: {
+        type: double,
+        default_value: 0.0,
+        description: "Velocity Proportional gain for PID"
+      }
+      velocity_i: {
+        type: double,
+        default_value: 0.0,
+        description: "Velocity Integral gain for PID"
+      }
+      velocity_d: {
+        type: double,
+        default_value: 0.0,
+        description: "Velocity Derivative gain for PID"
+      }
+      velocity_u_clamp_max: {
+        type: double,
+        default_value: .inf,
+        description: "Velocity Upper output clamp."
+      }
+      velocity_u_clamp_min: {
+        type: double,
+        default_value: -.inf,
+        description: "Velocity Lower output clamp."
+      }
+      velocity_i_clamp_max: {
+        type: double,
+        default_value: .inf,
+        description: "Velocity Upper integral clamp."
+      }
+      velocity_i_clamp_min: {
+        type: double,
+        default_value: -.inf,
+        description: "Velocity Lower integral clamp."
+      }
+      activate_state_publisher: {
+        type: bool,
+        default_value: false,
+        description: "Individual state publisher activation for each joint. If true, the controller will publish the state of each DOF to the topic `/<controller_name>/<dof_name>/pid_state`."
+      }

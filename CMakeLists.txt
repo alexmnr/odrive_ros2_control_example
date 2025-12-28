@@ -14,6 +14,7 @@ set(DEPENDENCIES
   rclcpp
   rclcpp_lifecycle
   controller_interface
+  generate_parameter_library
 )
 
 ######### Find Dependencies
@@ -22,37 +23,52 @@ foreach(Dependency IN ITEMS ${DEPENDENCIES})
 endforeach()
 ament_export_dependencies(${DEPENDENCIES})
 
-######### ODrive Hardware Interface & ODrive Controller
+######### ODrive Hardware Interface
 add_library(
-  ${PROJECT_NAME}
+  odrive_hardware_interface
   SHARED
   odrive_base/src/socket_can.cpp
   odrive_base/src/epoll_event_loop.cpp
   hardware/odrive_hardware_interface.cpp
+)
+target_compile_features(odrive_hardware_interface PUBLIC cxx_std_20)
+target_include_directories(odrive_hardware_interface PRIVATE hardware/include)
+target_include_directories(odrive_hardware_interface PRIVATE odrive_base/include)
+ament_target_dependencies(
+  odrive_hardware_interface 
+  PUBLIC
+  rclcpp
+  rclcpp_lifecycle
+  hardware_interface
+  pluginlib
+)
+pluginlib_export_plugin_description_file(hardware_interface odrive_hardware_interface.xml)
+install(TARGETS odrive_hardware_interface EXPORT export_odrive_hardware_interface)
+install(DIRECTORY hardware/include DESTINATION share/odrive_hardware_interface)
+install(DIRECTORY odrive_base/include DESTINATION share/odrive_hardware_interface)
+
+######### ODrive Controller
+generate_parameter_library(odrive_controller_parameters controller/odrive_controller_parameters.yaml)
+add_library(
+  odrive_controller
+  SHARED
   controller/odrive_controller.cpp
 )
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-target_include_directories(${PROJECT_NAME} PRIVATE hardware/include)
-target_include_directories(${PROJECT_NAME} PRIVATE controller/include)
-target_include_directories(${PROJECT_NAME} PRIVATE odrive_base/include)
-ament_target_dependencies(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
-pluginlib_export_plugin_description_file(hardware_interface odrive_hardware_interface.xml)
-install(
-  TARGETS odrive_ros2_control_example
-  EXPORT export_odrive_ros2_control_example
+target_compile_features(odrive_controller PUBLIC cxx_std_20)
+target_include_directories(odrive_controller PRIVATE controller/include)
+target_link_libraries(odrive_controller PUBLIC odrive_controller_parameters)
+ament_target_dependencies(
+  odrive_controller 
+  PUBLIC
+  controller_interface
+  rclcpp
+  rclcpp_lifecycle
+  pluginlib
 )
-install(
-  DIRECTORY hardware/include 
-  DESTINATION share/${PROJECT_NAME}/
-)
-install(
-  DIRECTORY controller/include 
-  DESTINATION share/${PROJECT_NAME}/
-)
-install(
-  DIRECTORY odrive_base/include 
-  DESTINATION share/${PROJECT_NAME}/
-)
+pluginlib_export_plugin_description_file(controller_interface odrive_controller.xml)
+install(TARGETS odrive_controller odrive_controller_parameters EXPORT export_odrive_controller)
+install(TARGETS odrive_controller EXPORT export_odrive_controller)
+install(DIRECTORY controller/include DESTINATION share/odrive_controller)
 
 ######### Install
 # Add description files
