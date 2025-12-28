@@ -15,3 +15,46 @@ odrive_forward_controller:
       - position
       - velocity
       - effort
+
+
+# controller_manager:
+#   ros__parameters:
+#     update_rate: 2000  # Hz
+
+#     joint_state_broadcaster:
+#       type: joint_state_broadcaster/JointStateBroadcaster
+
+#     position_controller:
+#       type: pid_controller/PidController
+
+#     velocity_controller:
+#       type: pid_controller/PidController
+
+# velocity_controller:
+#   ros__parameters:
+#     dof_names:
+#       - arm
+#     command_interface: effort
+
+#     reference_and_state_interfaces: 
+#      - velocity
+
+#     gains:
+#       arm: {"p": 0.10, "i": 0.00, "d": 0.0, "i_clamp_min": -.inf, "i_clamp_max": .inf, "antiwindup_strategy":'none'}
+
+# position_controller:
+#   ros__parameters:
+#     dof_names:
+#       - velocity_controller/arm
+#     command_interface: velocity
+#     # dof_names:
+#     #   - arm
+#     # command_interface: velocity
+
+#     reference_and_state_dof_names:
+#      - arm
+#     reference_and_state_interfaces: 
+#      - position
+
+#     gains:
+#       arm: {"p": 0.0, "i": 0.0, "d": 0.0, "i_clamp_min": -.inf, "i_clamp_max": .inf, "antiwindup_strategy":'none'}

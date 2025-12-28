@@ -1,5 +1,5 @@
-#ifndef ODRIVE_ROS2_CONTROL_EXAMPLE__ROBOT_HARDWARE_INTERFACE_HPP_
-#define ODRIVE_ROS2_CONTROL_EXAMPLE__ROBOT_HARDWARE_INTERFACE_HPP_
+#ifndef ODRIVE_HARDWARE_INTERFACE__ODRIVE_HARDWARE_INTERFACE_HPP_
+#define ODRIVE_HARDWARE_INTERFACE__ODRIVE_HARDWARE_INTERFACE_HPP_
 
 #include <memory>
 #include <string>
@@ -17,15 +17,14 @@
 #include "can_simple_messages.hpp"
 #include "odrive_enums.h"
 
-namespace odrive_ros2_control_example
+namespace odrive_hardware_interface
 {
-class RobotHardwareInterface : public hardware_interface::SystemInterface
+class ODriveHardwareInterface : public hardware_interface::SystemInterface
 {
   struct Joint {
     // parameters
     std::string name;
     uint8_t can_id;
-    double joint_reduction_ratio;
     double motor_velocity_limit;
     double motor_current_limit;
     double position_p_gain;
@@ -124,6 +123,6 @@ private:
   void clear_all_errors();
 };
 
-}  // namespace odrive_ros2_control_example
+}  // namespace odrive_hardware_interface
 
-#endif  // ODRIVE_ROS2_CONTROL_EXAMPLE__ROBOT_HARDWARE_INTERFACE_HPP_
+#endif  // ODRIVE_HARDWARE_INTERFACE__ODRIVE_HARDWARE_INTERFACE_HPP_

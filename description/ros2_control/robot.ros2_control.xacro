@@ -5,7 +5,7 @@
     <ros2_control name="robot_ros2_control" type="system">
 
       <hardware>
-        <plugin>odrive_ros2_control_example/RobotHardwareInterface</plugin>
+        <plugin>odrive_hardware_interface/ODriveHardwareInterface</plugin>
         <!-- Hardware Parameters -->
         <!-- Name of can interface to use -->
         <param name="can_interface_name">can0</param>
@@ -19,8 +19,8 @@
       </hardware>
 
       <joint name="arm">
-        <!-- Joint Parameters -->
-        <param name="joint_reduction_ratio">4</param>
+        <!-- Joint Parameters (unused by hardware interface)-->
+        <!-- <param name="joint_reduction_ratio">1</param> -->
         <!-- Motor Parameters -->
         <param name="can_id">0</param>
         <param name="motor_velocity_limit">10</param>

@@ -13,6 +13,7 @@ set(DEPENDENCIES
   pluginlib
   rclcpp
   rclcpp_lifecycle
+  controller_interface
 )
 
 ######### Find Dependencies
@@ -21,25 +22,31 @@ foreach(Dependency IN ITEMS ${DEPENDENCIES})
 endforeach()
 ament_export_dependencies(${DEPENDENCIES})
 
-######### Robot Hardware Interface
+######### ODrive Hardware Interface & ODrive Controller
 add_library(
   ${PROJECT_NAME}
   SHARED
   odrive_base/src/socket_can.cpp
   odrive_base/src/epoll_event_loop.cpp
-  hardware/robot_hardware_interface.cpp
+  hardware/odrive_hardware_interface.cpp
+  controller/odrive_controller.cpp
 )
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 target_include_directories(${PROJECT_NAME} PRIVATE hardware/include)
+target_include_directories(${PROJECT_NAME} PRIVATE controller/include)
 target_include_directories(${PROJECT_NAME} PRIVATE odrive_base/include)
 ament_target_dependencies(${PROJECT_NAME} PUBLIC ${DEPENDENCIES})
-pluginlib_export_plugin_description_file(hardware_interface odrive_ros2_control_example.xml)
+pluginlib_export_plugin_description_file(hardware_interface odrive_hardware_interface.xml)
 install(
   TARGETS odrive_ros2_control_example
   EXPORT export_odrive_ros2_control_example
 )
 install(
   DIRECTORY hardware/include 
+  DESTINATION share/${PROJECT_NAME}/
+)
+install(
+  DIRECTORY controller/include 
   DESTINATION share/${PROJECT_NAME}/
 )
 install(
