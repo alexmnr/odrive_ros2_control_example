@@ -56,11 +56,18 @@ def generate_launch_description():
         output="both",
         arguments=["odrive_forward_controller", "--param-file", controller_config_path, "--ros-args", "--log-level", "error"]
     )
+    odrive_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        output="both",
+        arguments=["odrive_controller", "--param-file", controller_config_path, "--ros-args", "--log-level", "info"]
+    )
     nodes = [
         robot_state_publisher_node,
         controller_manager,
         joint_state_broadcaster_spawner,
-        odrive_forward_controller_spawner
+        # odrive_forward_controller_spawner
+        odrive_controller_spawner,
     ]
 
     return LaunchDescription(declared_arguments + nodes)

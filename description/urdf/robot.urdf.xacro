@@ -43,7 +43,7 @@
   </joint>
 
   <!-- Import robot ros2_control description -->
-  <xacro:include filename="$(find odrive_ros2_control_example)/ros2_control/robot.ros2_control.xacro" />
+  <xacro:include filename="$(find odrive_ros2_control_example)/config/robot.ros2_control.xacro" />
   <xacro:robot_ros2_control/>
 
 </robot>

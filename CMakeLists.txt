@@ -15,6 +15,9 @@ set(DEPENDENCIES
   rclcpp_lifecycle
   controller_interface
   generate_parameter_library
+  control_toolbox
+  control_msgs
+  realtime_tools
 )
 
 ######### Find Dependencies
@@ -64,16 +67,24 @@ ament_target_dependencies(
   rclcpp
   rclcpp_lifecycle
   pluginlib
+  control_toolbox
+  control_msgs
+  realtime_tools
 )
 pluginlib_export_plugin_description_file(controller_interface odrive_controller.xml)
 install(TARGETS odrive_controller odrive_controller_parameters EXPORT export_odrive_controller)
 install(TARGETS odrive_controller EXPORT export_odrive_controller)
 install(DIRECTORY controller/include DESTINATION share/odrive_controller)
 
+######### ODrive Controller Value Publisher
+add_executable(odrive_controller_value_publisher testing/odrive_controller_value_publisher.cpp)
+ament_target_dependencies(odrive_controller_value_publisher rclcpp control_msgs)
+install(TARGETS odrive_controller_value_publisher DESTINATION lib/${PROJECT_NAME})
+
 ######### Install
 # Add description files
 install(
-  DIRECTORY description/launch description/urdf description/ros2_control
+  DIRECTORY description/launch description/urdf
   DESTINATION share/${PROJECT_NAME}/
 )
 # Add config files

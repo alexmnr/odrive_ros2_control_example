@@ -1,17 +1,30 @@
 controller_manager:
   ros__parameters:
-    update_rate: 1000  # Hz
+    update_rate: 10  # Hz
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-    odrive_forward_controller:
-      type: forward_command_controller/MultiInterfaceForwardCommandController
+    odrive_controller:
+      type: odrive_controller/ODriveController
 
-odrive_forward_controller:
+odrive_controller:
   ros__parameters:
-    joint: arm
-    interface_names:
-      - position
-      - velocity
-      - effort
+    joints:
+      - arm
+
+    gains:
+      arm: {
+        "position_p": 0.0, "position_i": 0.0, "position_d": 0.0, "position_i_min": -.inf, "position_i_max": .inf, "position_output_min:": -.inf, "position_output_max:": .inf,
+        "velocity_p": 0.0, "velocity_i": 0.0, "velocity_d": 0.0, "velocity_i_min": -.inf, "velocity_i_max": .inf, "velocity_output_min:": -.inf, "velocity_output_max:": .inf,
+      }
+    # odrive_forward_controller:
+    #   type: forward_command_controller/MultiInterfaceForwardCommandController
+
+# odrive_forward_controller:
+  # ros__parameters:
+    # joint: arm
+    # interface_names:
+    #   - position
+    #   - velocity
+    #   - effort
