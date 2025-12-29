@@ -19,13 +19,22 @@ class ODriveController : public controller_interface::ControllerInterface
     // parameters
     std::string name;
     uint8_t id;
-    std::shared_ptr<control_toolbox::Pid> pid;
+    std::shared_ptr<control_toolbox::Pid> velocity_pid;
+    std::shared_ptr<control_toolbox::Pid> position_pid;
 
-    double position_state;
-    double velocity_state;
-    double effort_state;
+    double position_state = std::numeric_limits<double>::quiet_NaN();
+    double velocity_state = std::numeric_limits<double>::quiet_NaN();
+    double effort_state = std::numeric_limits<double>::quiet_NaN();
+
+    double position_reference = std::numeric_limits<double>::quiet_NaN();
+    double velocity_reference = std::numeric_limits<double>::quiet_NaN();
+    double effort_reference = std::numeric_limits<double>::quiet_NaN();
 
     double position_command = std::numeric_limits<double>::quiet_NaN();
+    double velocity_command = std::numeric_limits<double>::quiet_NaN();
+    double effort_command = std::numeric_limits<double>::quiet_NaN();
+
+    uint8_t mode = 0;
   };
 public:
   ODriveController();
@@ -40,14 +49,19 @@ public:
 protected:
   std::shared_ptr<ParamListener> param_listener;
   Params params;
+  bool passthrough = false;
 
   // joints
   std::vector<Joint> joints;
 
   // listener
   realtime_tools::RealtimeThreadSafeBox<CommandType> rt_buffer;
-  CommandType command_msg;
+  CommandType reference_msg;
   rclcpp::Subscription<CommandType>::SharedPtr joints_cmd_sub;
+
+  // helper functions
+  void get_joint_states();
+  void get_joint_references();
 };
 
 }  // namespace odrive_controller

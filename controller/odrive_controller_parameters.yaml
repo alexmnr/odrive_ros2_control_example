@@ -9,6 +9,11 @@ odrive_controller:
       not_empty<>: null,
     }
   }
+  passthrough: {
+    type: bool,
+    default_value: false,
+    description: "If true, no controll logic is implemented and value is simply passed through to hardware interface."
+  }
   gains:
     __map_joints:
       position_p: {

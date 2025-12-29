@@ -16,9 +16,11 @@ public:
   : Node("odrive_controller_value_publisher")
   {
     this->declare_parameter("frequency", 0.0);
+    this->declare_parameter("interface", "position");
     this->declare_parameter("value", 0.0);
     this->declare_parameter("joint", "arm");
     frequency = this->get_parameter("frequency").as_double();
+    interface = this->get_parameter("interface").as_string();
     value = this->get_parameter("value").as_double();
     joint = this->get_parameter("joint").as_string();
 
@@ -26,7 +28,7 @@ public:
 
     if (frequency > 0.0) {
       // --- REPEATED MODE ---
-      auto timer_period = std::chrono::duration<double>(0.1);
+      auto timer_period = std::chrono::duration<double>(1.0 / frequency);
       RCLCPP_INFO(this->get_logger(), "Mode: REPEAT at %.2f Hz", frequency);
       timer_ = this->create_wall_timer(timer_period, std::bind(&ODriveControllerValuePublisher::publish_value, this));
 
@@ -48,7 +50,7 @@ private:
     message.joint_names = {joint};
 
     control_msgs::msg::InterfaceValue joint_interfaces;
-    joint_interfaces.interface_names = {"position"};
+    joint_interfaces.interface_names = {interface};
     joint_interfaces.values = {value};
     message.interface_values.push_back(joint_interfaces);
 
@@ -60,6 +62,7 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<control_msgs::msg::DynamicJointState>::SharedPtr publisher_;
   std::string joint;
+  std::string interface;
   double value;
   double frequency;
 };

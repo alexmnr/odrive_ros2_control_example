@@ -13,9 +13,10 @@
           Control Mode
             - position_filtered
             - position_trajectory
-            - torque
+            - velocity_control
+            - torque_control
         -->
-        <param name="control_mode">position_filtered</param>
+        <param name="control_mode">torque_control</param>
       </hardware>
 
       <joint name="arm">
