@@ -100,6 +100,8 @@ controller_interface::CallbackReturn ODriveController::on_configure(const rclcpp
 
 ////////////////////// on_activate /////////////////////////
 controller_interface::CallbackReturn ODriveController::on_activate(const rclcpp_lifecycle::State &) {
+  // get joint states
+  get_joint_states();
   if (passthrough) {
     // put hardware into requested mode
     for (auto& joint : joints) {
@@ -112,6 +114,7 @@ controller_interface::CallbackReturn ODriveController::on_activate(const rclcpp_
   } else {
     // put hardware into torque mode
     for (auto& joint : joints) {
+      joint.position_reference = joint.position_state;
       if (!command_interfaces_[(joint.id * 4) + 3].set_value((double)Modes::TORQUE_CONTROL)) {
         RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set mode for joint '%s'", joint.name.c_str());
       } else {

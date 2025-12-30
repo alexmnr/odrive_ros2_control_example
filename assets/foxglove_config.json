@@ -1,0 +1,270 @@
+{
+  "configById": {
+    "3D!ndti3d": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 6.1471373544998755,
+        "phi": 60.58017727639059,
+        "thetaOffset": 28.755036261081823,
+        "targetOffset": [
+          1.4117550552510274,
+          0.4573714706919688,
+          8.413911045361784e-18
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {
+        "transforms": {
+          "visible": false
+        }
+      },
+      "transforms": {},
+      "topics": {
+        "/robot_description": {
+          "visible": true
+        }
+      },
+      "layers": {
+        "grid": {
+          "visible": true,
+          "drawBehind": false,
+          "frameLocked": true,
+          "label": "Grid",
+          "instanceId": "a65e596c-e9d4-4243-a9c2-7bf36d63f8ee",
+          "layerId": "foxglove.Grid",
+          "size": 10,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "imageMode": {}
+    },
+    "Plot!1ox6yly": {
+      "paths": [
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/controller_manager/introspection_data/full.statistics[:]{name==\"command_interface.arm/position\"}.value",
+          "enabled": true,
+          "color": "#e88742",
+          "id": "00a15279-49d2-4a36-bb5b-2ff8720fd729",
+          "label": "Position Command"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/controller_manager/introspection_data/full.statistics[:]{name==\"state_interface.arm/position\"}.value",
+          "enabled": true,
+          "color": "#a33c12",
+          "id": "2ffeea06-5650-4df6-a11e-de5f4c855994",
+          "label": "Position State"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/controller_manager/introspection_data/full.statistics[:]{name==\"command_interface.arm/velocity\"}.value",
+          "enabled": true,
+          "color": "#34ea60",
+          "id": "5875e7ec-bc9b-4b11-909e-cb99e61209e0",
+          "label": "Velocity Command"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/controller_manager/introspection_data/full.statistics[:]{name==\"state_interface.arm/velocity\"}.value",
+          "enabled": true,
+          "color": "#13902a",
+          "id": "a7544aa3-caa6-4cc9-946c-22ad57edd593",
+          "label": "Velocity State"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/controller_manager/introspection_data/full.statistics[:]{name==\"command_interface.arm/effort\"}.value",
+          "enabled": true,
+          "color": "#48b1f8",
+          "id": "4d11af9f-32c4-404a-bade-3c41d3665e21",
+          "label": "Torque Command"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/controller_manager/introspection_data/full.statistics[:]{name==\"state_interface.arm/effort\"}.value",
+          "enabled": true,
+          "color": "#243ca4",
+          "id": "55d2dd25-507f-4b30-9b45-104312181e03",
+          "label": "Torque State"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/odrive_controller/command.interface_values[0]{interface_names==\"position\"}.values[:]",
+          "enabled": true,
+          "color": "#cad660",
+          "id": "0c502e28-c06d-478d-ad6e-c9f372d580d8",
+          "label": "Goal Position"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/odrive_controller/command.interface_values[0]{interface_names==\"velocity\"}.values[:]",
+          "enabled": true,
+          "color": "#4e98e2",
+          "id": "365458c0-4173-49c6-8f41-ec04e9db6b8d",
+          "label": "Goal Velocity"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/odrive_controller/command.interface_values[0]{interface_names==\"effort\"}.values[:]",
+          "enabled": true,
+          "color": "#f5774d",
+          "id": "a8f5bac9-6c76-4f72-8bf4-caf52050d098",
+          "label": "Goal Effort"
+        }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": false,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240
+    },
+    "3D!2emuxvw": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 6.470670899473392,
+        "phi": 58.772727272727984,
+        "thetaOffset": 33.54545454545766,
+        "targetOffset": [
+          1.2527537564267872,
+          1.1964785910817355,
+          2.7844894697644817e-18
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {
+        "transforms": {
+          "visible": false
+        }
+      },
+      "transforms": {},
+      "topics": {
+        "/robot_description": {
+          "visible": true
+        }
+      },
+      "layers": {
+        "grid": {
+          "visible": true,
+          "drawBehind": false,
+          "frameLocked": true,
+          "label": "Grid",
+          "instanceId": "6f701c63-96a4-4fc0-b85b-26dadeb21977",
+          "layerId": "foxglove.Grid",
+          "size": 10,
+          "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "imageMode": {}
+    },
+    "RawMessages!2ao0j1d": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/controller_manager/introspection_data/full",
+      "fontSize": 12
+    },
+    "Tab!jorsh8": {
+      "activeTabIdx": 1,
+      "tabs": [
+        {
+          "title": "3D",
+          "layout": "3D!ndti3d"
+        },
+        {
+          "title": "Plot",
+          "layout": {
+            "first": "Plot!1ox6yly",
+            "second": "3D!2emuxvw",
+            "direction": "row",
+            "splitPercentage": 60.197710718002085
+          }
+        },
+        {
+          "title": "Debug",
+          "layout": "RawMessages!2ao0j1d"
+        }
+      ]
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": "Tab!jorsh8"
+}
