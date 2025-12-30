@@ -3,27 +3,25 @@
 <package format="3">
   <name>odrive_ros2_control_example</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>hardware interface and controller to control motors using an odrive s1</description>
   <maintainer email="alexander@minor.pw">Alexander Minor</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GNU General Public License v3.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <!-- Dependencies -->
-  <exec_depend>controller_manager</exec_depend>
-  <exec_depend>control_msgs</exec_depend>
-  <!-- <exec_depend>geometry_msgs</exec_depend> -->
-  <exec_depend>robot_state_publisher</exec_depend>
-  <!-- <exec_depend>ros_gz_bridge</exec_depend> -->
-  <!-- <exec_depend>ros_gz_sim</exec_depend> -->
-  <exec_depend>xacro</exec_depend>
-  <exec_depend>joint_state_publisher</exec_depend>
-  <exec_depend>joint_state_publisher_gui</exec_depend>
-  <exec_depend>ros2_control_cmake</exec_depend>
-  <exec_depend>ros2_control</exec_depend>
-  <exec_depend>ros2_controllers</exec_depend>
-  <exec_depend>ros2controlcli</exec_depend>
-  <!-- <exec_depend>gz_ros2_control</exec_depend> -->
+  <depend>controller_manager</depend>
+  <depend>control_msgs</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>xacro</depend>
+  <depend>joint_state_publisher</depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>ros2_control_cmake</depend>
+  <depend>ros2_control</depend>
+  <depend>ros2_controllers</depend>
+  <depend>ros2controlcli</depend>
+  <depend>can-utils</depend>
+  <depend>foxglove_bridge</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
