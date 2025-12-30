@@ -81,6 +81,11 @@ add_executable(odrive_controller_value_publisher testing/odrive_controller_value
 ament_target_dependencies(odrive_controller_value_publisher rclcpp control_msgs)
 install(TARGETS odrive_controller_value_publisher DESTINATION lib/${PROJECT_NAME})
 
+######### ODrive Controller Sin Publisher
+add_executable(odrive_controller_sin_publisher testing/odrive_controller_sin_publisher.cpp)
+ament_target_dependencies(odrive_controller_sin_publisher rclcpp control_msgs)
+install(TARGETS odrive_controller_sin_publisher DESTINATION lib/${PROJECT_NAME})
+
 ######### Install
 # Add description files
 install(
