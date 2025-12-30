@@ -10,7 +10,7 @@ This repository contains multiple key components to control one or multiple [ODr
 
 # Background
 ## Disclaimer
-Much of the code in this repository is copied from this [official ODrive repository](https://github.com/odriverobotics/ros_odrive/tree/main). I added some additional features and refined some other aspects.
+Some of the code in this repository is copied from this [official ODrive repository](https://github.com/odriverobotics/ros_odrive/tree/main). I added some additional features and refined some other aspects.
 
 The code is **NOT** extensively tested -> **BE CAUTIOUS!**
 ## Why ros2_control?
