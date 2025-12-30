@@ -14,6 +14,11 @@ odrive_controller:
     default_value: false,
     description: "If true, no controll logic is implemented and value is simply passed through to hardware interface."
   }
+  mode: {
+    type: string,
+    default_value: "",
+    description: "Specify mode passed to hardware interface (only used when passthrough is set) [idle, position_filtered, position_trajectory, velocity_ramped, torque_control]"
+  }
   gains:
     __map_joints:
       position_p: {
@@ -41,16 +46,6 @@ odrive_controller:
         default_value: -.inf,
         description: "Position lower output limit."
       }
-      position_i_max: {
-        type: double,
-        default_value: .inf,
-        description: "Position upper integral limit."
-      }
-      position_i_min: {
-        type: double,
-        default_value: -.inf,
-        description: "Position lower integral limit."
-      }
       velocity_p: {
         type: double,
         default_value: 0.0,
@@ -75,19 +70,4 @@ odrive_controller:
         type: double,
         default_value: -.inf,
         description: "Velocity lower output limit."
-      }
-      velocity_i_max: {
-        type: double,
-        default_value: .inf,
-        description: "Velocity upper integral limit."
-      }
-      velocity_i_min: {
-        type: double,
-        default_value: -.inf,
-        description: "Velocity lower integral limit."
-      }
-      activate_state_publisher: {
-        type: bool,
-        default_value: false,
-        description: "Individual state publisher activation for each joint. If true, the controller will publish the state of each DOF to the topic `/<controller_name>/<dof_name>/pid_state`."
       }

@@ -18,33 +18,12 @@ namespace odrive_hardware_interface
     // Load hardware parameters
     can_interface_name_ = info_.hardware_parameters["can_interface_name"];
     RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] CAN inteface: %s", can_interface_name_.c_str());
-    control_mode_ = info_.hardware_parameters["control_mode"];
-    if (info_.hardware_parameters["control_mode"] == "position_filtered") {
-      odrive_control_mode_ = ODriveControlMode::CONTROL_MODE_POSITION_CONTROL;
-      odrive_input_mode_ = ODriveInputMode::INPUT_MODE_POS_FILTER;
-      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Control Mode: Filtered Position Control");
-    } else if (info_.hardware_parameters["control_mode"] == "position_trajectory") {
-      odrive_control_mode_ = ODriveControlMode::CONTROL_MODE_POSITION_CONTROL;
-      odrive_input_mode_ = ODriveInputMode::INPUT_MODE_TRAP_TRAJ;
-      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Control Mode: Trajectory Control");
-    } else if (control_mode_ == "velocity_control") {
-      odrive_control_mode_ = ODriveControlMode::CONTROL_MODE_VELOCITY_CONTROL;
-      odrive_input_mode_ = ODriveInputMode::INPUT_MODE_VEL_RAMP;
-      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Control Mode: Velocity Control");
-    } else if (control_mode_ == "torque_control") {
-      odrive_control_mode_ = ODriveControlMode::CONTROL_MODE_TORQUE_CONTROL;
-      odrive_input_mode_ = ODriveInputMode::INPUT_MODE_PASSTHROUGH;
-      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Control Mode: Torque Control");
-    } else {
-      RCLCPP_FATAL(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Unrecognized control mode: '%s'", control_mode_.c_str());
-      return hardware_interface::CallbackReturn::ERROR;
-    }
 
-    // create joint objects 
+    // load joints 
     for (const hardware_interface::ComponentInfo & joint_info : info_.joints)
     {
       // Check for correct size of command and state interfaces
-      if (joint_info.command_interfaces.size() != 3) {
+      if (joint_info.command_interfaces.size() != 4) {
         RCLCPP_FATAL(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Joint '%s' has %zu command interfaces. 3 expected.", joint_info.name.c_str(), joint_info.command_interfaces.size());
         return hardware_interface::CallbackReturn::ERROR;
       }
@@ -53,42 +32,75 @@ namespace odrive_hardware_interface
         return hardware_interface::CallbackReturn::ERROR;
       }
 
-      // create joint object
+      // create joint object and loading parameters
       ODriveHardwareInterface::Joint joint;
       joint.name = joint_info.name;
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Creating Joint '%s': ", joint.name.c_str());
+      if (!joint_info.parameters.count("can_id")) {
+        RCLCPP_FATAL(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Parameter can_id has to be specified!");
+        return CallbackReturn::FAILURE;
+      }
       joint.can_id = (uint8_t)std::stoi(joint_info.parameters.at("can_id"));
-      joint.motor_velocity_limit = std::stod(joint_info.parameters.at("motor_velocity_limit"));
-      joint.motor_current_limit = std::stod(joint_info.parameters.at("motor_current_limit"));
-      joint.position_p_gain = std::stod(joint_info.parameters.at("position_p_gain"));
-      joint.velocity_p_gain = std::stod(joint_info.parameters.at("velocity_p_gain"));
-      joint.velocity_i_gain = std::stod(joint_info.parameters.at("velocity_i_gain"));
-      joint.input_filter_bandwith = std::stod(joint_info.parameters.at("input_filter_bandwith"));
-      joint.trajectory_vel_limit = std::stod(joint_info.parameters.at("trajectory_vel_limit"));
-      joint.trajectory_accel_limit = std::stod(joint_info.parameters.at("trajectory_accel_limit"));
-      joint.trajectory_descel_limit = std::stod(joint_info.parameters.at("trajectory_descel_limit"));
-      joint.trajectory_inertia = std::stod(joint_info.parameters.at("trajectory_inertia"));
-      joints.push_back(joint);
-      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Created Joint '%s': ", joint.name.c_str());
+      if (joint_info.parameters.count("motor_velocity_limit")) {
+        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "what");
+        joint.motor_velocity_limit = std::stod(joint_info.parameters.at("motor_velocity_limit"));
+      }
+      if (joint_info.parameters.count("motor_current_limit")) {
+        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "what");
+        joint.motor_current_limit = std::stod(joint_info.parameters.at("motor_current_limit"));
+      }
+      if (joint_info.parameters.count("position_p_gain")) {
+        joint.position_p_gain = std::stod(joint_info.parameters.at("position_p_gain"));
+      }
+      if (joint_info.parameters.count("velocity_p_gain")) {
+        joint.velocity_p_gain = std::stod(joint_info.parameters.at("velocity_p_gain"));
+      }
+      if (joint_info.parameters.count("velocity_i_gain")) {
+        joint.velocity_i_gain = std::stod(joint_info.parameters.at("velocity_i_gain"));
+      }
+      if (joint_info.parameters.count("input_filter_bandwith")) {
+        joint.input_filter_bandwith = std::stod(joint_info.parameters.at("input_filter_bandwith"));
+      }
+      if (joint_info.parameters.count("trajectory_vel_limit")) {
+        joint.trajectory_vel_limit = std::stod(joint_info.parameters.at("trajectory_vel_limit"));
+      }
+      if (joint_info.parameters.count("trajectory_accel_limit")) {
+        joint.trajectory_accel_limit = std::stod(joint_info.parameters.at("trajectory_accel_limit"));
+      }
+      if (joint_info.parameters.count("trajectory_descel_limit")) {
+        joint.trajectory_descel_limit = std::stod(joint_info.parameters.at("trajectory_descel_limit"));
+      }
+      if (joint_info.parameters.count("trajectory_inertia")) {
+        joint.trajectory_inertia = std::stod(joint_info.parameters.at("trajectory_inertia"));
+      }
+      // get initial mode
+      if (joint_info.command_interfaces[3].initial_value == "" || std::stod(joint_info.command_interfaces[3].initial_value) == 0) {
+        joint.mode = Modes::IDLE;
+      } else {
+        joint.mode = std::stod(joint_info.command_interfaces[3].initial_value);
+      }
+      if ((int)joint.mode == Modes::IDLE) {RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   mode: IDLE");}
+      else if ((int)joint.mode == Modes::POSITION_FILTERED) {RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   mode: POSITION_FILTERED");}
+      else if ((int)joint.mode == Modes::POSITION_TRAJECTORY) {RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   mode: POSITION_TRAJECTORY");}
+      else if ((int)joint.mode == Modes::VELOCITY_RAMPED) {RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   mode: VELOCITY_RAMPED");}
+      else if ((int)joint.mode == Modes::TORQUE_CONTROL) {RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   mode: TORQUE_CONTROL");}
+      else {
+        RCLCPP_FATAL(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM] Unsupported mode: %d", (int)joint.mode);
+        return CallbackReturn::FAILURE;
+      }
+      // print info
       RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   can-id: %d", joint.can_id);
       RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-limit: %.1f", joint.motor_velocity_limit);
       RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   current-limit: %.1f", joint.motor_current_limit);
-      if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_POS_FILTER) {
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   position-p-gain: %.3f", joint.position_p_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-p-gain: %.3f", joint.velocity_p_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-i-gain: %.3f", joint.velocity_i_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   input_filter_bandwith: %.1f", joint.input_filter_bandwith);
-      } else if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_TRAP_TRAJ) {
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   position-p-gain: %.3f", joint.position_p_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-p-gain: %.3f", joint.velocity_p_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-i-gain: %.3f", joint.velocity_i_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_vel_limit: %.1f", joint.trajectory_vel_limit);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_accel_limit: %.1f", joint.trajectory_accel_limit);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_descel_limit: %.1f", joint.trajectory_descel_limit);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_inertia: %.1f", joint.trajectory_inertia);
-      } else if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_VEL_RAMP) {
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-p-gain: %.3f", joint.velocity_p_gain);
-        RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-i-gain: %.3f", joint.velocity_i_gain);
-      }
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   position-p-gain: %.3f", joint.position_p_gain);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-p-gain: %.3f", joint.velocity_p_gain);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   velocity-i-gain: %.3f", joint.velocity_i_gain);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   input_filter_bandwith: %.1f", joint.input_filter_bandwith);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_vel_limit: %.1f", joint.trajectory_vel_limit);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_accel_limit: %.1f", joint.trajectory_accel_limit);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_descel_limit: %.1f", joint.trajectory_descel_limit);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[PARAM]   trajectory_inertia: %.1f", joint.trajectory_inertia);
+      joints.push_back(joint);
     }
     return hardware_interface::CallbackReturn::SUCCESS;
   }
@@ -135,16 +147,16 @@ namespace odrive_hardware_interface
       }
     }
 
+    // clear all errors
+    clear_all_errors();
+    RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[CONFIG] Cleared all errors");
+
     // write parameters
     for (auto& joint : joints) {
       joint.set_motor_limits();
       joint.set_trajectory_limits();
       joint.set_gains();
     }
-
-    // clear all errors
-    clear_all_errors();
-    RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[CONFIG] Cleared all errors");
 
     return hardware_interface::CallbackReturn::SUCCESS;
   }
@@ -153,15 +165,8 @@ namespace odrive_hardware_interface
   hardware_interface::CallbackReturn ODriveHardwareInterface::on_activate(const rclcpp_lifecycle::State &) {
     // Arm all axis
     for (auto& joint : joints) {
-      // closed loop control
-      Set_Axis_State_msg_t set_axis_state_msg;
-      set_axis_state_msg.Axis_Requested_State = ODriveAxisState::AXIS_STATE_CLOSED_LOOP_CONTROL;
-      joint.send(set_axis_state_msg);
-      // control mode
-      Set_Controller_Mode_msg_t set_controller_mode_msg;
-      set_controller_mode_msg.Control_Mode = odrive_control_mode_;
-      set_controller_mode_msg.Input_Mode = odrive_input_mode_;
-      joint.send(set_controller_mode_msg);
+      joint.set_mode();
+      joint.previous_mode = joint.mode;
     }
 
     // Check if all joints are ready
@@ -235,34 +240,37 @@ namespace odrive_hardware_interface
       }
     }
 
+
     // set command position to all joints
     for (auto &joint : joints) {
+      if (joint.previous_mode != joint.mode) {
+        joint.set_mode();
+      }
+      joint.previous_mode = joint.mode;
       // position_filtered
-      if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_POS_FILTER) {
+      if ((int)joint.mode == Modes::POSITION_FILTERED) {
         Set_Input_Pos_msg_t msg;
         msg.Input_Pos = joint.position_command / (2 * M_PI);
         msg.Vel_FF = joint.velocity_command / (2 * M_PI);
         msg.Torque_FF = joint.effort_command / (2 * M_PI);
-        // RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[DEBUG] Pos: %f Vel: %f Torque: %f", msg.Input_Pos, msg.Vel_FF, msg.Torque_FF);
         joint.send(msg);
       // position_trajectory
-      } else if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_TRAP_TRAJ) {
+      } else if ((int)joint.mode == Modes::POSITION_TRAJECTORY) {
         Set_Input_Pos_msg_t msg;
         msg.Input_Pos = joint.position_command / (2 * M_PI);
         msg.Vel_FF = 0.0;
         msg.Torque_FF = 0.0;
         joint.send(msg);
-      // velocity_control
-      } else if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_VEL_RAMP) {
+      // velocity_ramped
+      } else if ((int)joint.mode == Modes::VELOCITY_RAMPED) {
         Set_Input_Vel_msg_t msg;
         msg.Input_Vel = joint.velocity_command / (2 * M_PI);
         msg.Input_Torque_FF = 0.0;
         joint.send(msg);
       // torque_control
-      } else if (odrive_input_mode_ == ODriveInputMode::INPUT_MODE_PASSTHROUGH) {
+      } else if ((int)joint.mode == Modes::TORQUE_CONTROL) {
         Set_Input_Torque_msg_t msg;
         msg.Input_Torque = joint.effort_command;
-        // RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[DEBUG] Torque: %f Setpoint: %f", msg.Input_Torque, joint.effort_target);
         joint.send(msg);
       }
     }
@@ -308,6 +316,7 @@ namespace odrive_hardware_interface
       command_interfaces.emplace_back(joint.name, "position", &joint.position_command);
       command_interfaces.emplace_back(joint.name, "velocity", &joint.velocity_command);
       command_interfaces.emplace_back(joint.name, "effort", &joint.effort_command);
+      command_interfaces.emplace_back(joint.name, "mode", &joint.mode);
     }
     return command_interfaces;
   }
@@ -428,6 +437,9 @@ namespace odrive_hardware_interface
     can_intf->send_can_frame(frame);
   }
   void ODriveHardwareInterface::Joint::set_motor_limits() {
+    if (std::isnan(motor_velocity_limit) || std::isnan(motor_current_limit)) {
+      return;
+    }
     // Set Velocity Limit
     Set_Limits_msg_t msg;
     if (motor_velocity_limit != 0) {
@@ -445,31 +457,92 @@ namespace odrive_hardware_interface
   }
   void ODriveHardwareInterface::Joint::set_trajectory_limits() {
     // Set Velocity Limit
-    Set_Traj_Vel_Limit_msg_t vel_limit_msg;
-    vel_limit_msg.Traj_Vel_Limit = (float)trajectory_vel_limit;
-    send(vel_limit_msg);
+    if (!std::isnan(trajectory_vel_limit)) {
+      Set_Traj_Vel_Limit_msg_t vel_limit_msg;
+      vel_limit_msg.Traj_Vel_Limit = (float)trajectory_vel_limit;
+      send(vel_limit_msg);
+    }
     // Set Acceleration Limit
-    Set_Traj_Accel_Limits_msg_t acc_limit_msg;
-    acc_limit_msg.Traj_Accel_Limit = (float)trajectory_accel_limit;
-    acc_limit_msg.Traj_Decel_Limit = (float)trajectory_descel_limit;
-    send(acc_limit_msg);
+    if (!std::isnan(trajectory_accel_limit) && !std::isnan(trajectory_descel_limit)) {
+      Set_Traj_Accel_Limits_msg_t acc_limit_msg;
+      acc_limit_msg.Traj_Accel_Limit = (float)trajectory_accel_limit;
+      acc_limit_msg.Traj_Decel_Limit = (float)trajectory_descel_limit;
+      send(acc_limit_msg);
+    }
     // Set Inertia
-    Set_Traj_Inertia_msg_t inertia_msg;
-    inertia_msg.Traj_Inertia = (float)trajectory_inertia;
-    send(inertia_msg);
+    if (!std::isnan(trajectory_inertia)) {
+      Set_Traj_Inertia_msg_t inertia_msg;
+      inertia_msg.Traj_Inertia = (float)trajectory_inertia;
+      send(inertia_msg);
+    }
   }
   void ODriveHardwareInterface::Joint::set_gains() {
     // Set Position Gains
-    Set_Pos_Gain_msg_t pos_msg;
-    pos_msg.Pos_Gain = (float)position_p_gain;
-    send(pos_msg);
+    if (!std::isnan(position_p_gain)) {
+      Set_Pos_Gain_msg_t pos_msg;
+      pos_msg.Pos_Gain = (float)position_p_gain;
+      send(pos_msg);
+    }
     // Set Velocity Gains
-    Set_Vel_Gains_msg_t vel_msg;
-    vel_msg.Vel_Gain = (float)velocity_p_gain;
-    vel_msg.Vel_Integrator_Gain = (float)velocity_i_gain;
-    send(vel_msg);
+    if (!std::isnan(velocity_p_gain) && !std::isnan(velocity_i_gain)) {
+      Set_Vel_Gains_msg_t vel_msg;
+      vel_msg.Vel_Gain = (float)velocity_p_gain;
+      vel_msg.Vel_Integrator_Gain = (float)velocity_i_gain;
+      send(vel_msg);
+    }
   }
-
+  void ODriveHardwareInterface::Joint::set_mode() {
+    // control mode
+    if ((int)mode == Modes::IDLE) {
+      // idle
+      Set_Axis_State_msg_t set_axis_state_msg;
+      set_axis_state_msg.Axis_Requested_State = ODriveAxisState::AXIS_STATE_IDLE;
+      send(set_axis_state_msg);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[UPDATE] Changed Mode to: IDLE");
+    } else if ((int)mode == Modes::POSITION_FILTERED) {
+      // position filtered 
+      Set_Controller_Mode_msg_t set_controller_mode_msg;
+      set_controller_mode_msg.Control_Mode = ODriveControlMode::CONTROL_MODE_POSITION_CONTROL;
+      set_controller_mode_msg.Input_Mode = ODriveInputMode::INPUT_MODE_POS_FILTER;
+      send(set_controller_mode_msg);
+      Set_Axis_State_msg_t set_axis_state_msg;
+      set_axis_state_msg.Axis_Requested_State = ODriveAxisState::AXIS_STATE_CLOSED_LOOP_CONTROL;
+      send(set_axis_state_msg);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[UPDATE] Changed Mode to: POSITION_FILTERED");
+    } else if ((int)mode == Modes::POSITION_TRAJECTORY) {
+      // position trajectory 
+      Set_Controller_Mode_msg_t set_controller_mode_msg;
+      set_controller_mode_msg.Control_Mode = ODriveControlMode::CONTROL_MODE_POSITION_CONTROL;
+      set_controller_mode_msg.Input_Mode = ODriveInputMode::INPUT_MODE_TRAP_TRAJ;
+      send(set_controller_mode_msg);
+      Set_Axis_State_msg_t set_axis_state_msg;
+      set_axis_state_msg.Axis_Requested_State = ODriveAxisState::AXIS_STATE_CLOSED_LOOP_CONTROL;
+      send(set_axis_state_msg);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[UPDATE] Changed Mode to: POSITION_TRAJECTORY");
+    } else if ((int)mode == Modes::VELOCITY_RAMPED) {
+      // velocity ramped 
+      Set_Controller_Mode_msg_t set_controller_mode_msg;
+      set_controller_mode_msg.Control_Mode = ODriveControlMode::CONTROL_MODE_VELOCITY_CONTROL;
+      set_controller_mode_msg.Input_Mode = ODriveInputMode::INPUT_MODE_VEL_RAMP;
+      send(set_controller_mode_msg);
+      Set_Axis_State_msg_t set_axis_state_msg;
+      set_axis_state_msg.Axis_Requested_State = ODriveAxisState::AXIS_STATE_CLOSED_LOOP_CONTROL;
+      send(set_axis_state_msg);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[UPDATE] Changed Mode to: VELOCITY_RAMPED");
+    } else if ((int)mode == Modes::TORQUE_CONTROL) {
+      // torque control
+      Set_Controller_Mode_msg_t set_controller_mode_msg;
+      set_controller_mode_msg.Control_Mode = ODriveControlMode::CONTROL_MODE_TORQUE_CONTROL;
+      set_controller_mode_msg.Input_Mode = ODriveInputMode::INPUT_MODE_PASSTHROUGH;
+      send(set_controller_mode_msg);
+      Set_Axis_State_msg_t set_axis_state_msg;
+      set_axis_state_msg.Axis_Requested_State = ODriveAxisState::AXIS_STATE_CLOSED_LOOP_CONTROL;
+      send(set_axis_state_msg);
+      RCLCPP_INFO(rclcpp::get_logger("ODriveHardwareInterface"), "[UPDATE] Changed Mode to: TORQUE_CONTROL");
+    } else if ((int)mode != 0) {
+      RCLCPP_FATAL(rclcpp::get_logger("ODriveHardwareInterface"), "Unrecognized mode: %d", (int)mode);
+    }
+  }
 
   ////////////////////// general helper functions /////////////////////////
   void ODriveHardwareInterface::clear_all_errors() {

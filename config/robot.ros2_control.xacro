@@ -6,42 +6,43 @@
 
       <hardware>
         <plugin>odrive_hardware_interface/ODriveHardwareInterface</plugin>
-        <!-- Hardware Parameters -->
         <!-- Name of can interface to use -->
         <param name="can_interface_name">can0</param>
-        <!-- 
-          Control Mode
-            - position_filtered
-            - position_trajectory
-            - velocity_control
-            - torque_control
-        -->
-        <param name="control_mode">torque_control</param>
       </hardware>
 
       <joint name="arm">
-        <!-- Joint Parameters (unused by hardware interface)-->
-        <!-- <param name="joint_reduction_ratio">1</param> -->
-        <!-- Motor Parameters -->
+        <!-- Required Motor Parameters -->
         <param name="can_id">0</param>
-        <param name="motor_velocity_limit">10</param>
-        <param name="motor_current_limit">15</param>
-        <!-- PID Gains -->
-        <param name="position_p_gain">30</param>
-        <param name="velocity_p_gain">0.2</param>
-        <param name="velocity_i_gain">4.0</param>
-        <!-- position_fitered control_mode parameters -->
-        <param name="input_filter_bandwith">1000</param>
-        <!-- position_trajectory control_mode parameters -->
-        <param name="trajectory_vel_limit">10</param>
-        <param name="trajectory_accel_limit">8</param>
-        <param name="trajectory_descel_limit">8</param>
-        <param name="trajectory_inertia">0</param>
+
+        <!-- Optional Motor Parameters -->
+
+        <!-- <param name="motor_velocity_limit">10</param> -->
+        <!-- <param name="motor_current_limit">15</param> -->
+        <!-- <param name="position_p_gain">30</param> -->
+        <!-- <param name="velocity_p_gain">0.2</param> -->
+        <!-- <param name="velocity_i_gain">4.0</param> -->
+        <!-- <param name="input_filter_bandwith">1000</param> -->
+        <!-- <param name="trajectory_vel_limit">10</param> -->
+        <!-- <param name="trajectory_accel_limit">8</param> -->
+        <!-- <param name="trajectory_descel_limit">8</param> -->
+        <!-- <param name="trajectory_inertia">0</param> -->
 
         <!-- Command Interfaces -->
         <command_interface name="position" data_type="double"/>
         <command_interface name="velocity" data_type="double"/>
         <command_interface name="effort" data_type="double"/>
+        <!-- 
+          Mode (the odrive_controller sets this automatically, change only if using another controller)
+            0 - idle (default)
+            1 - position_filtered
+            2 - position_trajectory
+            3 - velocity_ramped
+            4 - torque_control
+        -->
+        <command_interface name="mode" data_type="double">
+          <param name="initial_value">0</param>
+        </command_interface>
+
         <!-- State Interfaces -->
         <state_interface name="position" data_type="double"/>
         <state_interface name="velocity" data_type="double"/>

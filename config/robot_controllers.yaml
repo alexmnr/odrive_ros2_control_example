@@ -8,25 +8,20 @@ controller_manager:
     odrive_controller:
       type: odrive_controller/ODriveController
 
+
 odrive_controller:
   ros__parameters:
+    # Joints: specify names of joints to be controlled
     joints:
       - arm
 
-    passthrough: false
+    # Passthrough [true, false]: if true, all values send will be directly passed to the hardware. Use this if the odrive itself is handling all control.
+    passthrough: true
+    # Mode [idle, position_filterd, position_trajectory, velocity_ramped, torque_control]: If passthrough is used, specify which mode to configure the odrive to.
+    mode: torque_control
 
     gains:
       arm: {
-        "position_p": 30.0, "position_i": 0.0, "position_d": 0.0, "position_i_min": -.inf, "position_i_max": .inf, "position_output_min:": -.inf, "position_output_max:": .inf,
-        "velocity_p": 0.2, "velocity_i": 4.0, "velocity_d": 0.0, "velocity_i_min": -.inf, "velocity_i_max": .inf, "velocity_output_min:": -.inf, "velocity_output_max:": .inf,
+        "position_p": 30.0, "position_i": 0.0, "position_d": 0.0, "position_output_min:": -10.0, "position_output_max:": 10.0,
+        "velocity_p": 0.2, "velocity_i": 4.0, "velocity_d": 0.0, "velocity_output_min:": -.inf, "velocity_output_max:": .inf,
       }
-    # odrive_forward_controller:
-    #   type: forward_command_controller/MultiInterfaceForwardCommandController
-
-# odrive_forward_controller:
-  # ros__parameters:
-    # joint: arm
-    # interface_names:
-    #   - position
-    #   - velocity
-    #   - effort

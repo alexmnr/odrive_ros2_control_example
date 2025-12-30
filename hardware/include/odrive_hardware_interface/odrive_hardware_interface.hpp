@@ -21,24 +21,33 @@ namespace odrive_hardware_interface
 {
 class ODriveHardwareInterface : public hardware_interface::SystemInterface
 {
+  enum Modes {
+    IDLE = 0,
+    POSITION_FILTERED = 1,
+    POSITION_TRAJECTORY = 2,
+    VELOCITY_RAMPED = 3,
+    TORQUE_CONTROL = 4
+  };
   struct Joint {
     // parameters
     std::string name;
     uint8_t can_id;
-    double motor_velocity_limit;
-    double motor_current_limit;
-    double position_p_gain;
-    double velocity_p_gain;
-    double velocity_i_gain;
-    double input_filter_bandwith;
-    double trajectory_vel_limit;
-    double trajectory_accel_limit;
-    double trajectory_descel_limit;
-    double trajectory_inertia;
+    double motor_velocity_limit = std::numeric_limits<double>::quiet_NaN();
+    double motor_current_limit = std::numeric_limits<double>::quiet_NaN();
+    double position_p_gain = std::numeric_limits<double>::quiet_NaN();
+    double velocity_p_gain = std::numeric_limits<double>::quiet_NaN();
+    double velocity_i_gain = std::numeric_limits<double>::quiet_NaN();
+    double input_filter_bandwith = std::numeric_limits<double>::quiet_NaN();
+    double trajectory_vel_limit = std::numeric_limits<double>::quiet_NaN();
+    double trajectory_accel_limit = std::numeric_limits<double>::quiet_NaN();
+    double trajectory_descel_limit = std::numeric_limits<double>::quiet_NaN();
+    double trajectory_inertia = std::numeric_limits<double>::quiet_NaN();
     // command variables
-    double position_command = 0.0;
+    double position_command;
     double velocity_command = 0.0;
     double effort_command = 0.0;
+    double mode;
+    double previous_mode;
     // state variables
     double position_state = 0.0;
     double velocity_state = 0.0;
@@ -71,6 +80,7 @@ class ODriveHardwareInterface : public hardware_interface::SystemInterface
     void set_motor_limits();
     void set_trajectory_limits();
     void set_gains();
+    void set_mode();
     template <typename V>
     void write_parameter(uint16_t endpoint_id, V value);
     template <typename T>
@@ -104,10 +114,6 @@ public:
 private:
   // parameters
   std::string can_interface_name_;
-  std::string control_mode_;
-  // control and input mode variables
-  uint32_t odrive_control_mode_;
-  uint32_t odrive_input_mode_;
 
   // can variables
   SocketCanIntf can_intf_;

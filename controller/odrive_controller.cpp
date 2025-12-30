@@ -28,7 +28,27 @@ controller_interface::CallbackReturn ODriveController::on_init() {
 ////////////////////// on_configure /////////////////////////
 controller_interface::CallbackReturn ODriveController::on_configure(const rclcpp_lifecycle::State &) {
   passthrough = params.passthrough;
-  RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM] passthrough: %s", passthrough ? "true" : "false");
+  RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM] Passthrough: %s", passthrough ? "true" : "false");
+  if (passthrough) {
+    mode = params.mode;
+    if (mode == ""){
+      mode = "idle";
+      mode_cmd = Modes::IDLE;
+    } else if (mode == "idle") {
+      mode_cmd = Modes::IDLE;
+    } else if (mode == "position_filtered") {
+      mode_cmd = Modes::POSITION_FILTERED;
+    } else if (mode == "position_trajectory") {
+      mode_cmd = Modes::POSITION_TRAJECTORY;
+    } else if (mode == "velocity_ramped") {
+      mode_cmd = Modes::VELOCITY_RAMPED;
+    } else if (mode == "torque_control") {
+      mode_cmd = Modes::TORQUE_CONTROL;
+    } else {
+      RCLCPP_ERROR(rclcpp::get_logger("ODriveController"), "[PARAM] Mode '%s' not recognized! Possible modes: [idle, position_filtered, position_trajectory, velocity_ramped, torque_control]", mode.c_str());
+    }
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM] Mode: %s", mode.c_str());
+  }
   for (size_t i = 0; i < params.joints.size(); ++i)
   {
     ODriveController::Joint joint;
@@ -39,7 +59,7 @@ controller_interface::CallbackReturn ODriveController::on_configure(const rclcpp
     try {
       anti_windup_strategy_.validate();
     } catch (const std::exception & e) {
-      RCLCPP_ERROR(rclcpp::get_logger("ODriveController"), "[INIT] Invalid antiwindup strategy:: %s", e.what());
+      RCLCPP_ERROR(rclcpp::get_logger("ODriveController"), "[CONFIGURE] Invalid antiwindup strategy:: %s", e.what());
       return CallbackReturn::ERROR;
     }
     joint.position_pid = std::make_shared<control_toolbox::Pid>(
@@ -59,7 +79,14 @@ controller_interface::CallbackReturn ODriveController::on_configure(const rclcpp
         anti_windup_strategy_
         );
     joints.push_back(joint);
-    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM] Name: %s", params.joints[i].c_str());
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM] Creating Joint '%s': ", joint.name.c_str());
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   id: %d", joint.id);
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   position-p-gain: %.3f", params.gains.joints_map[joint.name].position_p);
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   position-i-gain: %.3f", params.gains.joints_map[joint.name].position_i);
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   position-d-gain: %.3f", params.gains.joints_map[joint.name].position_d);
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   velocity-p-gain: %.3f", params.gains.joints_map[joint.name].velocity_p);
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   velocity-i-gain: %.3f", params.gains.joints_map[joint.name].velocity_i);
+    RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[PARAM]   velocity-d-gain: %.3f", params.gains.joints_map[joint.name].velocity_d);
   }
 
   joints_cmd_sub = this->get_node()->create_subscription<CommandType>("odrive_controller/command", rclcpp::SystemDefaultsQoS(),
@@ -73,6 +100,26 @@ controller_interface::CallbackReturn ODriveController::on_configure(const rclcpp
 
 ////////////////////// on_activate /////////////////////////
 controller_interface::CallbackReturn ODriveController::on_activate(const rclcpp_lifecycle::State &) {
+  if (passthrough) {
+    // put hardware into requested mode
+    for (auto& joint : joints) {
+      if (!command_interfaces_[(joint.id * 4) + 3].set_value((double)mode_cmd)) {
+        RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set mode for joint '%s'", joint.name.c_str());
+      } else {
+        RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[CONFIG] Succesfully activated Joint '%s'", joint.name.c_str());
+      }
+    }
+  } else {
+    // put hardware into torque mode
+    for (auto& joint : joints) {
+      if (!command_interfaces_[(joint.id * 4) + 3].set_value((double)Modes::TORQUE_CONTROL)) {
+        RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set mode for joint '%s'", joint.name.c_str());
+      } else {
+        RCLCPP_INFO(rclcpp::get_logger("ODriveController"), "[CONFIG] Succesfully activated Joint '%s'", joint.name.c_str());
+      }
+    }
+
+  }
   return CallbackReturn::SUCCESS;
 }
 
@@ -88,17 +135,17 @@ controller_interface::return_type ODriveController::update(const rclcpp::Time & 
   if (passthrough) {
     for (auto& joint : joints) {
       if (!std::isnan(joint.position_reference)) {
-        if (!command_interfaces_[(joint.id * 3) + 0].set_value(joint.position_reference)) {
+        if (!command_interfaces_[(joint.id * 4) + 0].set_value(joint.position_reference)) {
           RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set position command interface value for joint '%s'", joint.name.c_str());
         }
       } 
       if (!std::isnan(joint.velocity_reference)) {
-        if (!command_interfaces_[(joint.id * 3) + 1].set_value(joint.velocity_reference)) {
+        if (!command_interfaces_[(joint.id * 4) + 1].set_value(joint.velocity_reference)) {
           RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set velocity command interface value for joint '%s'", joint.name.c_str());
         }
       } 
       if (!std::isnan(joint.effort_reference)) {
-        if (!command_interfaces_[(joint.id * 3) + 2].set_value(joint.effort_reference)) {
+        if (!command_interfaces_[(joint.id * 4) + 2].set_value(joint.effort_reference)) {
           RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set effort command interface value for joint '%s'", joint.name.c_str());
         }
       } 
@@ -109,13 +156,13 @@ controller_interface::return_type ODriveController::update(const rclcpp::Time & 
       // position pid
       if (std::isnan(joint.position_reference) || std::isnan(joint.position_state)) {continue;}
       double position_error = joint.position_reference - joint.position_state;
-      joint.velocity_reference = joint.position_pid->compute_command(position_error, period);
+      double temp_output = joint.position_pid->compute_command(position_error, period);
       // velocity pid
-      if (std::isnan(joint.velocity_reference) || std::isnan(joint.velocity_state)) {continue;}
-      double velocity_error = joint.velocity_reference - joint.velocity_state;
+      if (std::isnan(joint.velocity_state)) {continue;}
+      double velocity_error = temp_output - joint.velocity_state;
       joint.effort_command = joint.velocity_pid->compute_command(velocity_error, period);
       // write effort value
-      if (!command_interfaces_[(joint.id * 3) + 2].set_value(joint.effort_command)) {
+      if (!command_interfaces_[(joint.id * 4) + 2].set_value(joint.effort_command)) {
         RCLCPP_WARN(rclcpp::get_logger("ODriveController"), "Failed to set effort command interface value for joint '%s'", joint.name.c_str());
       }
     }
@@ -140,6 +187,7 @@ controller_interface::InterfaceConfiguration ODriveController::command_interface
     names_.push_back(joint.name + "/position");
     names_.push_back(joint.name + "/velocity");
     names_.push_back(joint.name + "/effort");
+    names_.push_back(joint.name + "/mode");
   }
   command_interfaces_config.names = names_;
   return command_interfaces_config;

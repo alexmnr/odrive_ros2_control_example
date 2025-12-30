@@ -14,6 +14,13 @@ namespace odrive_controller
 using CommandType = control_msgs::msg::DynamicJointState;
 class ODriveController : public controller_interface::ControllerInterface
 {
+  enum Modes {
+    IDLE = 0,
+    POSITION_FILTERED = 1,
+    POSITION_TRAJECTORY = 2,
+    VELOCITY_RAMPED = 3,
+    TORQUE_CONTROL = 4
+  };
   struct Joint {
     Joint() {};
     // parameters
@@ -50,6 +57,8 @@ protected:
   std::shared_ptr<ParamListener> param_listener;
   Params params;
   bool passthrough = false;
+  std::string mode;
+  uint8_t mode_cmd;
 
   // joints
   std::vector<Joint> joints;
