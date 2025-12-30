@@ -6,6 +6,8 @@ This repository contains multiple key components to control one or multiple [ODr
    → [More info](odrive_ros2_control/README.md)
 - **`example configuration`**: Launch, config and urdf files as an example for using the `odrive_hardware_interface` and `odrive_controller`.
 
+![Visualisation](assets/foxglove_value_visualisation.gif)
+
 # Background
 ## Disclaimer
 Much of the code in this repository is copied from this [official ODrive repository](https://github.com/odriverobotics/ros_odrive/tree/main). I added some additional features and refined some other aspects.
@@ -283,5 +285,5 @@ ros2 run foxglove_bridge foxglove_bridge
 ```
 Now open foxglove studio and open a connection to the device running the code. From the top right corner click on **Import from File** and choose `assets/foxglove_config.json` from this repository. It should look something like this (note that the motor is experiencing a lot of resistence in this example):
 
-![Visualisation](assets/foxglove_visualisation.gif)
+![Visualisation](assets/foxglove_sin_visualisation.gif)
 
